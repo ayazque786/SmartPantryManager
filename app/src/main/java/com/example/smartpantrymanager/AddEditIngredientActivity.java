@@ -2,7 +2,6 @@ package com.example.smartpantrymanager;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +24,20 @@ public class AddEditIngredientActivity extends AppCompatActivity {
 
     private DatabaseHelper databaseHelper;
 
+    private boolean isEditMode = false;
+    private int ingredientId = -1;
+
+    private final String[] units = {
+            "items",
+            "g",
+            "kg",
+            "ml",
+            "L",
+            "cups",
+            "tbsp",
+            "tsp"
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +53,7 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         databaseHelper = new DatabaseHelper(this);
 
         setupUnitSpinner();
+        checkForEditMode();
 
         editTextExpiryDate.setOnClickListener(v -> showDatePicker());
 
@@ -47,16 +61,6 @@ public class AddEditIngredientActivity extends AppCompatActivity {
     }
 
     private void setupUnitSpinner() {
-        String[] units = {
-                "items",
-                "g",
-                "kg",
-                "ml",
-                "L",
-                "cups",
-                "tbsp",
-                "tsp"
-        };
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
@@ -71,45 +75,110 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         spinnerUnit.setAdapter(adapter);
     }
 
+    private void checkForEditMode() {
+
+        if (getIntent().hasExtra("ingredient_id")) {
+
+            isEditMode = true;
+
+            ingredientId = getIntent().getIntExtra(
+                    "ingredient_id",
+                    -1
+            );
+
+            String name = getIntent().getStringExtra(
+                    "ingredient_name"
+            );
+
+            double quantity = getIntent().getDoubleExtra(
+                    "ingredient_quantity",
+                    0
+            );
+
+            String unit = getIntent().getStringExtra(
+                    "ingredient_unit"
+            );
+
+            String expiryDate = getIntent().getStringExtra(
+                    "ingredient_expiry"
+            );
+
+            textFormTitle.setText("Edit Ingredient");
+            buttonSaveIngredient.setText("Update Ingredient");
+
+            editTextName.setText(name);
+            editTextQuantity.setText(String.valueOf(quantity));
+            editTextExpiryDate.setText(expiryDate);
+
+            for (int i = 0; i < units.length; i++) {
+
+                if (units[i].equals(unit)) {
+                    spinnerUnit.setSelection(i);
+                    break;
+                }
+            }
+        }
+    }
+
     private void showDatePicker() {
+
         Calendar calendar = Calendar.getInstance();
 
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(
-                this,
-                (view, selectedYear, selectedMonth, selectedDay) -> {
-                    String date = selectedDay + "/" +
-                            (selectedMonth + 1) + "/" +
-                            selectedYear;
+        DatePickerDialog datePickerDialog =
+                new DatePickerDialog(
+                        this,
+                        (view, selectedYear,
+                         selectedMonth, selectedDay) -> {
 
-                    editTextExpiryDate.setText(date);
-                },
-                year,
-                month,
-                day
-        );
+                            String date =
+                                    selectedDay + "/" +
+                                            (selectedMonth + 1) + "/" +
+                                            selectedYear;
+
+                            editTextExpiryDate.setText(date);
+                        },
+                        year,
+                        month,
+                        day
+                );
 
         datePickerDialog.show();
     }
 
     private void saveIngredient() {
 
-        String name = editTextName.getText().toString().trim();
-        String quantityText = editTextQuantity.getText().toString().trim();
-        String unit = spinnerUnit.getSelectedItem().toString();
-        String expiryDate = editTextExpiryDate.getText().toString().trim();
+        String name =
+                editTextName.getText().toString().trim();
+
+        String quantityText =
+                editTextQuantity.getText().toString().trim();
+
+        String unit =
+                spinnerUnit.getSelectedItem().toString();
+
+        String expiryDate =
+                editTextExpiryDate.getText().toString().trim();
 
         if (name.isEmpty()) {
-            editTextName.setError("Please enter an ingredient name");
+
+            editTextName.setError(
+                    "Please enter an ingredient name"
+            );
+
             editTextName.requestFocus();
             return;
         }
 
         if (quantityText.isEmpty()) {
-            editTextQuantity.setError("Please enter a quantity");
+
+            editTextQuantity.setError(
+                    "Please enter a quantity"
+            );
+
             editTextQuantity.requestFocus();
             return;
         }
@@ -117,41 +186,82 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         double quantity;
 
         try {
+
             quantity = Double.parseDouble(quantityText);
+
         } catch (NumberFormatException e) {
-            editTextQuantity.setError("Please enter a valid quantity");
+
+            editTextQuantity.setError(
+                    "Please enter a valid quantity"
+            );
+
             return;
         }
 
         if (quantity <= 0) {
-            editTextQuantity.setError("Quantity must be greater than 0");
+
+            editTextQuantity.setError(
+                    "Quantity must be greater than 0"
+            );
+
             return;
         }
 
         Ingredient ingredient = new Ingredient(
-                0,
+                ingredientId,
                 name,
                 quantity,
                 unit,
                 expiryDate
         );
 
-        long result = databaseHelper.addIngredient(ingredient);
+        if (isEditMode) {
 
-        if (result != -1) {
-            Toast.makeText(
-                    this,
-                    "Ingredient added successfully",
-                    Toast.LENGTH_SHORT
-            ).show();
+            int result =
+                    databaseHelper.updateIngredient(ingredient);
 
-            finish();
+            if (result > 0) {
+
+                Toast.makeText(
+                        this,
+                        "Ingredient updated successfully",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                finish();
+
+            } else {
+
+                Toast.makeText(
+                        this,
+                        "Unable to update ingredient",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+
         } else {
-            Toast.makeText(
-                    this,
-                    "Unable to add ingredient",
-                    Toast.LENGTH_SHORT
-            ).show();
+
+            long result =
+                    databaseHelper.addIngredient(ingredient);
+
+            if (result != -1) {
+
+                Toast.makeText(
+                        this,
+                        "Ingredient added successfully",
+                        Toast.LENGTH_SHORT
+                ).show();
+
+                finish();
+
+            } else {
+
+                Toast.makeText(
+                        this,
+                        "Unable to add ingredient",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
         }
     }
 }

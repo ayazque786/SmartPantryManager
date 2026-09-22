@@ -46,7 +46,19 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onEdit(Ingredient ingredient) {
-                        // Edit functionality will be connected next.
+
+                        Intent intent = new Intent(
+                                MainActivity.this,
+                                AddEditIngredientActivity.class
+                        );
+
+                        intent.putExtra("ingredient_id", ingredient.getId());
+                        intent.putExtra("ingredient_name", ingredient.getName());
+                        intent.putExtra("ingredient_quantity", ingredient.getQuantity());
+                        intent.putExtra("ingredient_unit", ingredient.getUnit());
+                        intent.putExtra("ingredient_expiry", ingredient.getExpiryDate());
+
+                        startActivity(intent);
                     }
 
                     @Override
@@ -62,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         loadIngredients();
 
         buttonAddIngredient.setOnClickListener(v -> {
+
             Intent intent = new Intent(
                     MainActivity.this,
                     AddEditIngredientActivity.class
