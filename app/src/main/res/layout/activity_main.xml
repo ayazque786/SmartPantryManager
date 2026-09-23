@@ -60,4 +60,13 @@
         android:textSize="16sp"
         android:layout_marginTop="8dp" />
 
+    <Button
+        android:id="@+id/buttonSettings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Settings"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        android:layout_marginTop="8dp" />
+
 </LinearLayout>

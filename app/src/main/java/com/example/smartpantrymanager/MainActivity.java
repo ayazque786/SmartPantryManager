@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textEmpty;
     private Button buttonAddIngredient;
     private Button buttonSuggestedRecipes;
+    private Button buttonSettings;
 
     private DatabaseHelper databaseHelper;
     private IngredientAdapter ingredientAdapter;
@@ -29,24 +30,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Connect views from activity_main.xml
         recyclerViewIngredients = findViewById(R.id.recyclerViewIngredients);
         textEmpty = findViewById(R.id.textEmpty);
         buttonAddIngredient = findViewById(R.id.buttonAddIngredient);
         buttonSuggestedRecipes = findViewById(R.id.buttonSuggestedRecipes);
+        buttonSettings = findViewById(R.id.buttonSettings);
 
-        // Create database helper
         databaseHelper = new DatabaseHelper(this);
 
-        // Create ingredient list
         ingredientList = new ArrayList<>();
 
-        // Set up RecyclerView
         recyclerViewIngredients.setLayoutManager(
                 new LinearLayoutManager(this)
         );
 
-        // Set up ingredient adapter
         ingredientAdapter = new IngredientAdapter(
                 ingredientList,
                 new IngredientAdapter.OnIngredientActionListener() {
@@ -101,10 +98,9 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerViewIngredients.setAdapter(ingredientAdapter);
 
-        // Load pantry ingredients
         loadIngredients();
 
-        // Add Ingredient button
+        // Open Add Ingredient screen
         buttonAddIngredient.setOnClickListener(v -> {
 
             Intent intent = new Intent(
@@ -115,12 +111,23 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // Suggested Recipes button
+        // Open Suggested Recipes screen
         buttonSuggestedRecipes.setOnClickListener(v -> {
 
             Intent intent = new Intent(
                     MainActivity.this,
                     SuggestedRecipesActivity.class
+            );
+
+            startActivity(intent);
+        });
+
+        // Open Settings screen
+        buttonSettings.setOnClickListener(v -> {
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    SettingsActivity.class
             );
 
             startActivity(intent);
@@ -137,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
 
         ingredientAdapter.notifyDataSetChanged();
 
-        // Show empty message if pantry has no ingredients
         if (ingredientList.isEmpty()) {
 
             textEmpty.setVisibility(View.VISIBLE);
@@ -154,8 +160,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        // Refresh pantry whenever returning to this screen
-        if (databaseHelper != null && ingredientAdapter != null) {
+        if (databaseHelper != null &&
+                ingredientAdapter != null) {
+
             loadIngredients();
         }
     }
