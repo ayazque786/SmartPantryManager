@@ -2,10 +2,13 @@ package com.example.smartpantrymanager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -132,6 +135,53 @@ public class MainActivity extends AppCompatActivity {
 
             startActivity(intent);
         });
+    }
+
+    // Display the three-dot navigation menu.
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(
+                R.menu.main_menu,
+                menu
+        );
+
+        return true;
+    }
+
+    // Handle selections from the navigation menu.
+    @Override
+    public boolean onOptionsItemSelected(
+            @NonNull MenuItem item
+    ) {
+
+        int itemId = item.getItemId();
+
+        if (itemId == R.id.menuSuggestedRecipes) {
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    SuggestedRecipesActivity.class
+            );
+
+            startActivity(intent);
+
+            return true;
+        }
+
+        if (itemId == R.id.menuSettings) {
+
+            Intent intent = new Intent(
+                    MainActivity.this,
+                    SettingsActivity.class
+            );
+
+            startActivity(intent);
+
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void loadIngredients() {
