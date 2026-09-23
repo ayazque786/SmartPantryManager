@@ -35,7 +35,8 @@ public class AddEditIngredientActivity extends AppCompatActivity {
             "L",
             "cups",
             "tbsp",
-            "tsp"
+            "tsp",
+            "slices"
     };
 
     @Override
@@ -108,7 +109,10 @@ public class AddEditIngredientActivity extends AppCompatActivity {
 
             editTextName.setText(name);
             editTextQuantity.setText(String.valueOf(quantity));
-            editTextExpiryDate.setText(expiryDate);
+
+            if (expiryDate != null) {
+                editTextExpiryDate.setText(expiryDate);
+            }
 
             for (int i = 0; i < units.length; i++) {
 
@@ -146,6 +150,36 @@ public class AddEditIngredientActivity extends AppCompatActivity {
                         day
                 );
 
+        /*
+         * Prevent the user from selecting an expiry date
+         * earlier than today.
+         */
+        Calendar today = Calendar.getInstance();
+
+        today.set(
+                Calendar.HOUR_OF_DAY,
+                0
+        );
+
+        today.set(
+                Calendar.MINUTE,
+                0
+        );
+
+        today.set(
+                Calendar.SECOND,
+                0
+        );
+
+        today.set(
+                Calendar.MILLISECOND,
+                0
+        );
+
+        datePickerDialog.getDatePicker().setMinDate(
+                today.getTimeInMillis()
+        );
+
         datePickerDialog.show();
     }
 
@@ -163,6 +197,7 @@ public class AddEditIngredientActivity extends AppCompatActivity {
         String expiryDate =
                 editTextExpiryDate.getText().toString().trim();
 
+        // Validate ingredient name
         if (name.isEmpty()) {
 
             editTextName.setError(
@@ -173,6 +208,7 @@ public class AddEditIngredientActivity extends AppCompatActivity {
             return;
         }
 
+        // Validate quantity field
         if (quantityText.isEmpty()) {
 
             editTextQuantity.setError(
@@ -195,15 +231,18 @@ public class AddEditIngredientActivity extends AppCompatActivity {
                     "Please enter a valid quantity"
             );
 
+            editTextQuantity.requestFocus();
             return;
         }
 
+        // Quantity cannot be zero or negative
         if (quantity <= 0) {
 
             editTextQuantity.setError(
                     "Quantity must be greater than 0"
             );
 
+            editTextQuantity.requestFocus();
             return;
         }
 
