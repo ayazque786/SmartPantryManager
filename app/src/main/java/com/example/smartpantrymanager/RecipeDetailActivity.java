@@ -59,18 +59,45 @@ public class RecipeDetailActivity extends AppCompatActivity {
 
                 ingredientText
                         .append("• ")
-                        .append(formatQuantity(ingredient.getQuantity()))
-                        .append(" ")
-                        .append(ingredient.getUnit())
-                        .append(" ")
-                        .append(ingredient.getIngredientName())
+                        .append(formatIngredient(ingredient))
                         .append("\n");
             }
 
-            textRecipeIngredients.setText(ingredientText.toString());
+            textRecipeIngredients.setText(ingredientText.toString().trim());
         }
 
         buttonBackToRecipes.setOnClickListener(v -> finish());
+    }
+
+    private String formatIngredient(RecipeIngredient ingredient) {
+
+        String quantity = formatQuantity(ingredient.getQuantity());
+        String unit = ingredient.getUnit();
+        String name = ingredient.getIngredientName();
+
+        if (unit == null) {
+            unit = "";
+        }
+
+        String normalisedUnit = unit.trim().toLowerCase();
+
+        // Item/piece units do not need to be displayed.
+        if (normalisedUnit.equals("items")
+                || normalisedUnit.equals("item")
+                || normalisedUnit.equals("pcs")
+                || normalisedUnit.equals("pc")
+                || normalisedUnit.equals("piece")
+                || normalisedUnit.equals("pieces")) {
+
+            return quantity + " " + name;
+        }
+
+        // Other units such as g, kg, ml, cups and slices are displayed.
+        if (!normalisedUnit.isEmpty()) {
+            return quantity + " " + unit + " " + name;
+        }
+
+        return quantity + " " + name;
     }
 
     private String formatQuantity(double quantity) {
